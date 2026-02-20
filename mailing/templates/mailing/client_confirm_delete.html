@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление клиента{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Подтверждение удаления
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="fs-5">Вы уверены, что хотите удалить клиента?</p>
+                
+                <div class="alert alert-warning">
+                    <strong>{{ client.full_name }}</strong><br>
+                    {{ client.email }}
+                </div>
+                
+                <p class="text-danger">
+                    <i class="bi bi-exclamation-circle"></i>
+                    Это действие нельзя отменить. Все данные клиента будут удалены.
+                </p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'client_detail' client.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Удалить
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

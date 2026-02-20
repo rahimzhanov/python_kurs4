@@ -1,0 +1,62 @@
+<!-- templates/index.html -->
+{% extends 'base.html' %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-4">Добро пожаловать в Сервис рассылок!</h1>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <i class="bi bi-envelope-paper fs-1 text-primary mb-3"></i>
+                <h5 class="card-title">Управляйте своими рассылками легко</h5>
+                <p class="card-text">
+                    Создавайте рассылки, управляйте клиентами и отслеживайте статистику в одном месте.
+                </p>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                    <a href="#" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i> Войти
+                    </a>
+                    <a href="#" class="btn btn-success btn-lg">
+                        <i class="bi bi-person-plus"></i> Регистрация
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Карточки с преимуществами -->
+        <div class="row mt-5">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="bi bi-people fs-1 text-primary"></i>
+                        <h5 class="card-title">Управление клиентами</h5>
+                        <p class="card-text">Добавляйте и редактируйте получателей рассылок</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="bi bi-envelope fs-1 text-primary"></i>
+                        <h5 class="card-title">Создание рассылок</h5>
+                        <p class="card-text">Планируйте и запускайте email-рассылки</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="bi bi-graph-up fs-1 text-primary"></i>
+                        <h5 class="card-title">Статистика</h5>
+                        <p class="card-text">Отслеживайте успешность отправок</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

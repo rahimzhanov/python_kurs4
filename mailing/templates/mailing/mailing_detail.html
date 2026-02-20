@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ mailing.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-send"></i> {{ mailing.name }}
+                </h4>
+                <span class="badge bg-light text-dark fs-6">
+                    Статус: {{ status }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Основная информация</h5>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Название:</th>
+                                <td>{{ mailing.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Сообщение:</th>
+                                <td>
+                                    <strong>{{ mailing.message.subject }}</strong>
+                                    <br>
+                                    <small>{{ mailing.message.body|truncatechars:100 }}</small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Получателей:</th>
+                                <td>{{ mailing.recipients.count }}</td>
+                            </tr>
+                            <tr>
+                                <th>Активна:</th>
+                                <td>
+                                    {% if mailing.is_active %}
+                                        <span class="badge bg-success">Да</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Нет</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5>Временные параметры</h5>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Начало:</th>
+                                <td>{{ mailing.start_time|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Окончание:</th>
+                                <td>{{ mailing.end_time|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Создана:</th>
+                                <td>{{ mailing.created_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Обновлена:</th>
+                                <td>{{ mailing.updated_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Список получателей -->
+                <h5 class="mt-4">Получатели</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Ф.И.О.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for client in mailing.recipients.all %}
+                            <tr>
+                                <td>{{ client.email }}</td>
+                                <td>{{ client.full_name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Статистика отправок -->
+                <h5 class="mt-4">Статистика отправок</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h3>{{ total_attempts }}</h3>
+                                <p class="text-muted">Всего попыток</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-body text-success">
+                                <h3>{{ success_attempts }}</h3>
+                                <p class="text-muted">Успешно</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-body text-danger">
+                                <h3>{{ failed_attempts }}</h3>
+                                <p class="text-muted">Не успешно</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Кнопки действий -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'mailing_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Назад к списку
+                    </a>
+                    <div>
+                        <a href="{% url 'mailing_update' mailing.pk %}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Редактировать
+                        </a>
+                        <a href="{% url 'mailing_delete' mailing.pk %}" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Удалить
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Редактирование{% else %}Создание{% endif %} рассылки{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    {% if object %}
+                        <i class="bi bi-pencil"></i> Редактирование рассылки
+                    {% else %}
+                        <i class="bi bi-plus-circle"></i> Создание новой рассылки
+                    {% endif %}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Название рассылки -->
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                            {{ form.name.label }}
+                        </label>
+                        {{ form.name }}
+                        <div class="form-text">{{ form.name.help_text }}</div>
+                        {% if form.name.errors %}
+                            <div class="alert alert-danger mt-2">{{ form.name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Сообщение -->
+                    <div class="mb-3">
+                        <label for="{{ form.message.id_for_label }}" class="form-label">
+                            {{ form.message.label }}
+                        </label>
+                        {{ form.message }}
+                        <div class="form-text">{{ form.message.help_text }}</div>
+                        {% if form.message.errors %}
+                            <div class="alert alert-danger mt-2">{{ form.message.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Получатели -->
+                    <div class="mb-3">
+                        <label for="{{ form.recipients.id_for_label }}" class="form-label">
+                            {{ form.recipients.label }}
+                        </label>
+                        {{ form.recipients }}
+                        <div class="form-text">{{ form.recipients.help_text }}</div>
+                        {% if form.recipients.errors %}
+                            <div class="alert alert-danger mt-2">{{ form.recipients.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Дата и время начала -->
+                    <div class="mb-3">
+                        <label for="{{ form.start_time.id_for_label }}" class="form-label">
+                            {{ form.start_time.label }}
+                        </label>
+                        {{ form.start_time }}
+                        <div class="form-text">{{ form.start_time.help_text }}</div>
+                        {% if form.start_time.errors %}
+                            <div class="alert alert-danger mt-2">{{ form.start_time.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Дата и время окончания -->
+                    <div class="mb-3">
+                        <label for="{{ form.end_time.id_for_label }}" class="form-label">
+                            {{ form.end_time.label }}
+                        </label>
+                        {{ form.end_time }}
+                        <div class="form-text">{{ form.end_time.help_text }}</div>
+                        {% if form.end_time.errors %}
+                            <div class="alert alert-danger mt-2">{{ form.end_time.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Активность -->
+                    <div class="mb-3 form-check">
+                        {{ form.is_active }}
+                        <label for="{{ form.is_active.id_for_label }}" class="form-check-label">
+                            {{ form.is_active.label }}
+                        </label>
+                    </div>
+                    
+                    <!-- Общие ошибки формы -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'mailing_list' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Отмена
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> 
+                            {% if object %}Сохранить{% else %}Создать{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

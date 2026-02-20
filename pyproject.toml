@@ -1,0 +1,39 @@
+[project]
+name = "pythonproject-kurs4"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Rakhimzhanov Aman",email = "amanrahim2@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "python-dotenv (==1.2.1)",
+    "django (==6.0)",
+    "asgiref (==3.11.0)",
+    "asttokens (==3.0.1)",
+    "colorama (==0.4.6)",
+    "decorator (==5.2.1)",
+    "executing (==2.2.1)",
+    "ipython (==9.9.0)",
+    "ipython-pygments-lexers (==1.1.1)",
+    "jedi (==0.19.2)",
+    "matplotlib-inline (==0.2.1)",
+    "parso (==0.8.5)",
+    "pillow (==12.0.0)",
+    "prompt-toolkit (==3.0.52)",
+    "psycopg2-binary (==2.9.11)",
+    "pure-eval (==0.2.3)",
+    "pygments (==2.19.2)",
+    "redis (==7.1.1)",
+    "sqlparse (==0.5.4)",
+    "stack-data (==0.6.3)",
+    "traitlets (==5.14.3)",
+    "tzdata (==2025.2)",
+    "wcwidth (==0.2.14)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

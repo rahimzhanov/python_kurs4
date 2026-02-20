@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои рассылки{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-send"></i> Мои рассылки</h1>
+    <a href="{% url 'mailing_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Создать рассылку
+    </a>
+</div>
+
+{% if mailings %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Название</th>
+                    <th>Сообщение</th>
+                    <th>Получателей</th>
+                    <th>Период</th>
+                    <th>Статус</th>
+                    <th>Активна</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mailing in mailings %}
+                <tr>
+                    <td>{{ mailing.name }}</td>
+                    <td>{{ mailing.message.subject|truncatechars:30 }}</td>
+                    <td>{{ mailing.recipients.count }}</td>
+                    <td>
+                        {{ mailing.start_time|date:"d.m.Y" }}<br>
+                        <small>до {{ mailing.end_time|date:"d.m.Y" }}</small>
+                    </td>
+                    <td>
+                        {% with status=mailing.get_status_display %}
+                            {% if status == 'Запущена' %}
+                                <span class="badge bg-success">{{ status }}</span>
+                            {% elif status == 'Создана' %}
+                                <span class="badge bg-warning">{{ status }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ status }}</span>
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        {% if mailing.is_active %}
+                            <span class="badge bg-success">Да</span>
+                        {% else %}
+                            <span class="badge bg-danger">Нет</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'mailing_detail' mailing.pk %}" class="btn btn-sm btn-info" title="Просмотр">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{% url 'mailing_update' mailing.pk %}" class="btn btn-sm btn-warning" title="Редактировать">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'mailing_delete' mailing.pk %}" class="btn btn-sm btn-danger" title="Удалить">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Пагинация -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+{% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> У вас пока нет рассылок. 
+        <a href="{% url 'mailing_create' %}" class="alert-link">Создайте первую рассылку</a>!
+    </div>
+{% endif %}
+{% endblock %}
