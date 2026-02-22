@@ -118,7 +118,8 @@ AUTH_USER_MODEL = 'users.User'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Almaty'  # Или твой регион (Asia/Almaty и т.д.)
+USE_TZ = True
 
 USE_I18N = True
 
@@ -144,8 +145,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # В разработке письма выводятся в консоль, а не отправляются реально
 
-# Для реальной отправки (когда будете готовы):
+# Для реальной отправки :
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 # EMAIL_HOST = 'smtp.yandex.ru'
 # EMAIL_PORT = 465
 # EMAIL_USE_SSL = True

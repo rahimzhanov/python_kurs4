@@ -1,13 +1,17 @@
 # users/views.py
-from django.shortcuts import render, redirect
+from django.views import View
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth import login
 from django.core.mail import send_mail
 from django.conf import settings
 from .forms import UserRegistrationForm
+from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
+from django.shortcuts import redirect, get_object_or_404
 from .models import User
+from common.mixins import ManagerRequiredMixin
 
 
 class RegisterView(CreateView):
@@ -67,3 +71,49 @@ class CustomLoginView(LoginView):
         Куда перенаправить после успешного входа
         """
         return reverse_lazy('home')  # На главную страницу
+
+    class ManagerRequiredMixin(UserPassesTestMixin):
+        """Проверка, что пользователь - менеджер"""
+
+        def test_func(self):
+            return self.request.user.groups.filter(name='Менеджеры').exists()
+
+        def handle_no_permission(self):
+            messages.error(self.request, 'У вас нет прав для просмотра этой страницы')
+            return redirect('home')
+
+
+
+class UserListView(LoginRequiredMixin, ManagerRequiredMixin, ListView):
+        """
+        Список пользователей (только для менеджеров)
+        """
+        model = User
+        template_name = 'users/user_list.html'
+        context_object_name = 'users'
+        paginate_by = 20
+
+        def get_queryset(self):
+            return User.objects.all().order_by('-date_joined')
+
+class UserToggleActiveView(LoginRequiredMixin, ManagerRequiredMixin, View):
+        """
+        Блокировка/разблокировка пользователя (только для менеджеров)
+        """
+
+        def post(self, request, pk):
+            user = get_object_or_404(User, pk=pk)
+
+            # Не даем заблокировать самого себя
+            if user == request.user:
+                messages.error(request, 'Нельзя заблокировать самого себя')
+                return redirect('user_list')
+
+            # Переключаем статус
+            user.is_active = not user.is_active
+            user.save()
+
+            status = 'активирован' if user.is_active else 'заблокирован'
+            messages.success(request, f'Пользователь {user.email} {status}')
+
+            return redirect('user_list')
