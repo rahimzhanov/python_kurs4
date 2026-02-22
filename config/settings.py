@@ -155,3 +155,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_HOST_PASSWORD = 'ваш_пароль'
 
 DEFAULT_FROM_EMAIL = 'noreply@mailingservice.com'
+
+
+LOGIN_URL = '/users/login/'        # Куда идти для входа
+LOGIN_REDIRECT_URL = '/'           # Куда после успешного входа
+LOGOUT_REDIRECT_URL = '/'          # Куда после выхода

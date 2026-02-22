@@ -13,77 +13,142 @@ from .forms import MessageForm
 from .forms import MailingForm
 from .services import send_mailing
 from common.mixins import ManagerOrOwnerMixin
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
-
-# mailing/views.py
 
 class HomeView(TemplateView):
     """
-    Главная страница со статистикой
+    Главная страница со статистикой (с кэшированием)
     """
     template_name = 'index.html'
+
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Для авторизованных пользователей
+        # Создаем ключ для кэша (разный для разных пользователей)
         if self.request.user.is_authenticated:
-            # Проверяем, является ли пользователь менеджером
+            if self.request.user.groups.filter(name='Managers').exists():
+                cache_key = f'home_stats_manager_{self.request.user.id}'
+            else:
+                cache_key = f'home_stats_user_{self.request.user.id}'
+        else:
+            cache_key = 'home_stats_anonymous'
+
+        # Пробуем получить данные из кэша
+        stats = cache.get(cache_key)
+
+        if stats is None:
+            # Если в кэше нет - вычисляем
+            stats = self.calculate_stats()
+            # Сохраняем в кэш на 5 минут
+            cache.set(cache_key, stats, timeout=60 * 5)
+
+            # Для отладки
+            print(f"Данные вычислены заново для {self.request.user}")
+        else:
+            # Для отладки
+            print(f"Данные взяты из кэша для {self.request.user}")
+
+        # Добавляем статистику в контекст
+        context.update(stats)
+
+        # Добавляем информацию о кэшировании (для отладки)
+        context['from_cache'] = stats.get('from_cache', False)
+
+        return context
+
+    def calculate_stats(self):
+        """
+        Вычисление статистики (вынесено в отдельный метод)
+        """
+        stats = {}
+
+        if self.request.user.is_authenticated:
             is_manager = self.request.user.groups.filter(name='Managers').exists()
 
             if is_manager:
-                # Менеджер видит ОБЩУЮ статистику по всем пользователям
-                context['total_mailings'] = Mailing.objects.count()
-                context['total_clients'] = Client.objects.count()
-                context['total_messages'] = Message.objects.count()
+                # Статистика для менеджера
+                stats['total_mailings'] = Mailing.objects.count()
+                stats['total_clients'] = Client.objects.count()
+                stats['total_messages'] = Message.objects.count()
 
-                # Для активных рассылок нужно проверить статус у всех
                 mailings = Mailing.objects.all()
                 active_mailings = 0
                 for mailing in mailings:
                     if mailing.get_status() == 'running':
                         active_mailings += 1
-                context['active_mailings'] = active_mailings
-
-                # Добавляем пометку, что это общая статистика
-                context['stats_type'] = 'общая статистика по всем пользователям'
+                stats['active_mailings'] = active_mailings
+                stats['stats_type'] = 'общая статистика по всем пользователям'
 
             else:
-                # Обычный пользователь видит только свою статистику
-                context['total_mailings'] = Mailing.objects.filter(owner=self.request.user).count()
-                context['total_clients'] = Client.objects.filter(owner=self.request.user).count()
-                context['total_messages'] = Message.objects.filter(owner=self.request.user).count()
+                # Статистика для обычного пользователя
+                stats['total_mailings'] = Mailing.objects.filter(owner=self.request.user).count()
+                stats['total_clients'] = Client.objects.filter(owner=self.request.user).count()
+                stats['total_messages'] = Message.objects.filter(owner=self.request.user).count()
 
-                # Активные рассылки только свои
                 mailings = Mailing.objects.filter(owner=self.request.user)
                 active_mailings = 0
                 for mailing in mailings:
                     if mailing.get_status() == 'running':
                         active_mailings += 1
-                context['active_mailings'] = active_mailings
-
-                context['stats_type'] = 'ваша личная статистика'
+                stats['active_mailings'] = active_mailings
+                stats['stats_type'] = 'ваша личная статистика'
 
         else:
-            # Для неавторизованных - общая статистика по сайту
-            context['total_mailings'] = Mailing.objects.count()
-            context['total_clients'] = Client.objects.count()
-            context['total_messages'] = Message.objects.count()
-            context['active_mailings'] = 0
-            context['stats_type'] = 'общая статистика сайта'
+            # Статистика для гостей
+            stats['total_mailings'] = Mailing.objects.count()
+            stats['total_clients'] = Client.objects.count()
+            stats['total_messages'] = Message.objects.count()
+            stats['active_mailings'] = 0
+            stats['stats_type'] = 'общая статистика сайта'
 
-        return context
+        stats['from_cache'] = False  # Помечаем, что данные свежие
+        return stats
 
+
+# mailing/views.py
 
 class ClientListView(LoginRequiredMixin, ManagerOrOwnerMixin, ListView):
-    """
-    Список всех клиентов текущего пользователя
-    """
     model = Client
     template_name = 'mailing/client_list.html'
     context_object_name = 'clients'
-    paginate_by = 10  # Пагинация: 10 клиентов на странице
+    paginate_by = 10
 
+    def get_queryset(self):
+        """
+        Кэшируем список клиентов
+        """
+        # Создаем ключ для кэша
+        if self.request.user.groups.filter(name='Managers').exists():
+            cache_key = f'client_list_all'
+        else:
+            cache_key = f'client_list_user_{self.request.user.id}'
+
+        # Пробуем получить из кэша
+        cached_queryset = cache.get(cache_key)
+
+        if cached_queryset is not None:
+            print(f"⚡ Список клиентов взят из кэша для {self.request.user}")
+            return cached_queryset
+
+        # Если нет в кэше - получаем из базы
+        queryset = super().get_queryset()
+
+        if self.request.user.groups.filter(name='Managers').exists():
+            result = queryset
+        else:
+            result = queryset.filter(owner=self.request.user)
+
+        # Сохраняем в кэш (осторожно: list() превращает QuerySet в список)
+        cache.set(cache_key, list(result), timeout=60 * 5)
+        print(f"💰 Список клиентов сохранен в кэш для {self.request.user}")
+
+        return result
 
 
 class ClientDetailView(LoginRequiredMixin, ManagerOrOwnerMixin, DetailView):
@@ -112,6 +177,17 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, 'Клиент успешно создан!')
         return super().form_valid(form)
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+
+        # Очищаем кэш после создания
+        cache.delete_pattern('client_list_*')
+        if self.request.user.groups.filter(name='Managers').exists():
+            cache.delete('client_list_all')
+
+        messages.success(self.request, 'Клиент успешно создан!')
+        return super().form_valid(form)
+
 
 class ClientUpdateView(LoginRequiredMixin, ManagerOrOwnerMixin,  UpdateView):
     """
@@ -125,6 +201,15 @@ class ClientUpdateView(LoginRequiredMixin, ManagerOrOwnerMixin,  UpdateView):
         messages.success(self.request, 'Клиент успешно обновлен!')
         return reverse('client_detail', kwargs={'pk': self.object.pk})
 
+    def form_valid(self, form):
+        # Очищаем кэш после обновления
+        cache.delete_pattern('client_list_*')
+        if self.request.user.groups.filter(name='Managers').exists():
+            cache.delete('client_list_all')
+
+        messages.success(self.request, 'Клиент успешно обновлен!')
+        return super().form_valid(form)
+
 
 class ClientDeleteView(LoginRequiredMixin, ManagerOrOwnerMixin, DeleteView):
     """
@@ -135,6 +220,11 @@ class ClientDeleteView(LoginRequiredMixin, ManagerOrOwnerMixin, DeleteView):
     success_url = reverse_lazy('client_list')
 
     def delete(self, request, *args, **kwargs):
+        # Очищаем кэш после удаления
+        cache.delete_pattern('client_list_*')
+        if self.request.user.groups.filter(name='Managers').exists():
+            cache.delete('client_list_all')
+
         messages.success(self.request, 'Клиент успешно удален!')
         return super().delete(request, *args, **kwargs)
 
