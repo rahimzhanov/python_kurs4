@@ -98,41 +98,46 @@ python manage.py runserver
 
 ## Структура проекта
 PythonProject_Kurs4/
+```
 ├── common/                    # Общие файлы (миксины)
 │   ├── __init__.py
-│   └── mixins.py
+│   └── mixins.py              # Классы для проверки прав доступа
 ├── config/                    # Настройки проекта
 │   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
+│   ├── settings.py            # Основные настройки Django
+│   ├── urls.py                # Главный файл маршрутов
 │   └── wsgi.py
 ├── users/                      # Приложение пользователей
-│   ├── migrations/
-│   ├── templates/users/
+│   ├── migrations/             # Миграции БД
+│   ├── templates/
+│   │   └── users/              # Шаблоны для users
 │   ├── __init__.py
-│   ├── admin.py
-│   ├── forms.py
-│   ├── models.py
-│   ├── urls.py
-│   └── views.py
+│   ├── admin.py                # Настройки админки
+│   ├── apps.py
+│   ├── forms.py                # Формы регистрации/входа
+│   ├── models.py               # Модель пользователя
+│   ├── urls.py                 # Маршруты для users
+│   └── views.py                # Представления users
 ├── mailing/                     # Основное приложение
 │   ├── migrations/
-│   ├── templates/mailing/
+│   ├── templates/
+│   │   └── mailing/             # Шаблоны для mailing
 │   ├── __init__.py
 │   ├── admin.py
-│   ├── forms.py
-│   ├── models.py
-│   ├── services.py
-│   ├── urls.py
-│   └── views.py
-├── templates/                   # Общие шаблоны
-│   ├── base.html
-│   └── index.html
-├── static/                       # Статические файлы
-├── media/                        # Загружаемые файлы
+│   ├── apps.py
+│   ├── forms.py                 # Формы для клиентов/сообщений/рассылок
+│   ├── models.py                # Модели Client, Message, Mailing, Attempt
+│   ├── services.py              # Функция отправки рассылок
+│   ├── urls.py                  # Маршруты для mailing
+│   └── views.py                 # Все представления
+├── templates/                    # Общие шаблоны
+│   ├── base.html                 # Базовый шаблон
+│   └── index.html                # Главная страница
+├── static/                        # Статические файлы
+├── media/                         # Загружаемые файлы
 ├── manage.py
 └── requirements.txt
-
+```
 ## Основные маршруты
 / - главная страница
 /users/register/ - регистрация
