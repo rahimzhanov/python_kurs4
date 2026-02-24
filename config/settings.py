@@ -160,3 +160,23 @@ DEFAULT_FROM_EMAIL = 'noreply@mailingservice.com'
 LOGIN_URL = '/users/login/'        # Куда идти для входа
 LOGIN_REDIRECT_URL = '/'           # Куда после успешного входа
 LOGOUT_REDIRECT_URL = '/'          # Куда после выхода
+
+
+# Настройки кэширования Redis (упрощенные)
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            # УБИРАЕМ hiredis parser
+            # 'PARSER_CLASS': 'redis.connection.HiredisParser',
+        },
+        'KEY_PREFIX': 'mailing_service',
+        'TIMEOUT': 60 * 15,  # 15 минут
+    }
+}
+
+# Опционально: использовать Redis для сессий
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'

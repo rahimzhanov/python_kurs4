@@ -133,7 +133,7 @@ PythonProject_Kurs4/
 ├── templates/                    # Общие шаблоны
 │   ├── base.html                 # Базовый шаблон
 │   └── index.html                # Главная страница
-├── static/                        # Статические файлы
+├── static/                        # Статические файлы  
 ├── media/                         # Загружаемые файлы
 ├── manage.py
 └── requirements.txt
