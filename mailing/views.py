@@ -14,8 +14,6 @@ from .forms import MailingForm
 from .services import send_mailing
 from common.mixins import ManagerOrOwnerMixin
 from django.core.cache import cache
-from django.views.decorators.cache import cache_page
-from django.utils.decorators import method_decorator
 
 
 class HomeView(TemplateView):
